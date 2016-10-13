@@ -1,7 +1,5 @@
 package com.multiplex.auditorium;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class Auditorium {
 	
 	Seat[][]seats;
@@ -11,7 +9,6 @@ public class Auditorium {
 			for(int j=0;j<b;j++)
 				seats[i][j]=new Seat();
 		}
-		
 	}
 	
 	public Seat[][] getSeatStatus(){

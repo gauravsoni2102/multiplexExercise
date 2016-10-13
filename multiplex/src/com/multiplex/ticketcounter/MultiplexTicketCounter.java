@@ -4,6 +4,9 @@ import java.util.Random;
 
 import com.multiplex.auditorium.AuditoriumHelper;
 import com.multiplex.auditorium.Seat;
+import com.multiplex.db.DAO;
+import com.multiplex.ticketcounter.ticket.IPrinter;
+import com.multiplex.ticketcounter.ticket.ITicket;
 import com.multiplex.ticketcounter.ticket.ITicketDetail;
 import com.multiplex.ticketcounter.ticket.SeatDetail;
 import com.multiplex.ticketcounter.ticket.Ticket;
@@ -14,13 +17,14 @@ import com.multiplex.ticketcounter.ticket.Ticket;
  */
 public class MultiplexTicketCounter extends TicketCounterBase{
 
-	public MultiplexTicketCounter(String counterId,String counterName) {
-		super(counterId,counterName);
+	
+	public MultiplexTicketCounter(String counterId,String counterName,IPrinter printer) {
+		super(counterId,counterName,printer);
+		
 	}
 	@Override
-	public synchronized void book(final String movieArgs) {
+	public synchronized ITicket book(final String movieArgs) {
 		Ticket ticket=null;
-
 		String[] movieDetails=movieArgs.split(":");
 		String movieCode=movieDetails[0];
 		String movieTime=movieDetails[1];
@@ -41,7 +45,6 @@ public class MultiplexTicketCounter extends TicketCounterBase{
 					ticket=bookNSeatsInRow(noOfSeats,row,seatstatus);
 				}
 			}
-
 			else{
 				if(!preferenceParameters[1].equals("")){
 					ticket=bookAnyNSeatsInRowTogether(noOfSeats,row,seatstatus);
@@ -50,15 +53,15 @@ public class MultiplexTicketCounter extends TicketCounterBase{
 					ticket=bookAnyNSeatsTogether(noOfSeats,seatstatus);
 				}
 			}
-			ticket.setMovieName(movieCode);
-			ticket.setMovieTime(movieTime);
-			td(ticket);
-			System.out.println();
+			ticket.setMovieName(DAO.getMovie(movieCode));
+			ticket.setMovieTime(DAO.getTimings(movieTime));
+			ticket.setcounterName(counterName);
 		}
 		catch(Exception e){
 			e.printStackTrace();
 		}
 		ss(seatstatus);
+		return ticket;
 	}
 	private Ticket bookAnyNSeatsFromFront(final int noOfSeats,final Seat[][] seatstatus) throws NotEnoughSeatsException{
 		int nos=noOfSeats;
@@ -99,7 +102,7 @@ public class MultiplexTicketCounter extends TicketCounterBase{
 		return ticket;
 	}
 
-	Ticket bookNSeatsInRow(int noOfSeats,final int row,final Seat[][] seatstatus) throws NotEnoughSeatsException{
+	private Ticket bookNSeatsInRow(int noOfSeats,final int row,final Seat[][] seatstatus) throws NotEnoughSeatsException{
 		Random r=new Random();
 		Ticket ticket=new Ticket();
 		int counterId=r.nextInt();
@@ -141,12 +144,10 @@ public class MultiplexTicketCounter extends TicketCounterBase{
 		int counterId=r.nextInt();
 
 		for(int seat=0;seat<=seatstatus[row].length-noOfSeats&&tnos>0;seat++){
-			//tnos=noOfSeats;
 			for(int i=0;i<noOfSeats;i++){
 				synchronized(seatstatus[row][seat+i]){
 					if(seatstatus[row][seat+i].getSetstatus()==0){
 						seatstatus[row][seat+i].setSetstatus(counterId);
-						System.out.println(seat+i+"--");
 						tnos--;
 					}
 					else{
@@ -189,7 +190,7 @@ public class MultiplexTicketCounter extends TicketCounterBase{
 
 	void td(Ticket t){
 		for(ITicketDetail x:t.seats){
-			System.out.println(((SeatDetail)x).row+"  "+((SeatDetail)x).seatno);
+			System.out.println(((SeatDetail)x).getSeatNumber());
 		}
 
 	}

@@ -1,6 +1,10 @@
 package com.multiplex.ticketcounter;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.multiplex.ticketcounter.ticket.IPrinter;
+import com.multiplex.ticketcounter.ticket.ITicket;
 /**
  * @author gaurav.soni
  *The TicketCounterBase is a general base class for a ticket counter.
@@ -9,11 +13,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *real world, only one ticket can be booked at the counter at a time.  
  */
 public abstract class TicketCounterBase implements Runnable{
-	private String counterId;
-	private String counterName;
+	protected String counterId;
+	protected String counterName;
+	private IPrinter printer;
+	private ConcurrentLinkedQueue<String>movieDetails;
 	AtomicBoolean hasCustomer;
-	String preferenceArgs;
-	public TicketCounterBase(String counterId,String counterName) {
+	public TicketCounterBase(final String counterId,final String counterName,final IPrinter printer) {
+		movieDetails=new ConcurrentLinkedQueue<String>();
+		this.printer=printer;
 		this.counterId=counterId;
 		this.counterName=counterName;
 		hasCustomer=new AtomicBoolean(false);
@@ -32,25 +39,27 @@ public abstract class TicketCounterBase implements Runnable{
 					e.printStackTrace();
 				}
 			}
-
-			book(preferenceArgs);
-			preferenceArgs="";
+			while(!movieDetails.isEmpty()){
+				String movieDetail=movieDetails.poll();
+				ITicket ticket=book(movieDetail);
+				printer.print(ticket);
+			}
 			hasCustomer.set(false);
 		}
 
 	}
-	abstract public void book(final String preferenceArgs);
+	abstract public ITicket book(final String movieArgs);
 
-	synchronized private void customerArrivalHandleEvent(final String preferenceArgs){
-		this.preferenceArgs=preferenceArgs;
+	synchronized private void customerArrivalHandleEvent(final String movieArgs){
 		hasCustomer.set(true);
 		notify();
 	}
 
 
-	public void customerArrivalEvent(final String preferenceArgs){
-		while(hasCustomer.get()){}//So that if a customer is present, other doesn't enter
-		customerArrivalHandleEvent(preferenceArgs);	
+	public void customerArrivalEvent(final String movieArgs){
+		movieDetails.add(movieArgs);
+		customerArrivalHandleEvent(movieArgs);	
+
 	}
 
 
