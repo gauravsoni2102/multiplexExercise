@@ -29,16 +29,16 @@ public abstract class TicketCounterBase implements Runnable{
 		}
 
 	}
-	abstract public void book(String preferenceArgs);
+	abstract public void book(final String preferenceArgs);
 
-	synchronized private void customerArrivalHandleEvent(String preferenceArgs){
+	synchronized private void customerArrivalHandleEvent(final String preferenceArgs){
 		this.preferenceArgs=preferenceArgs;
 		hasCustomer.set(true);
 		notify();
 	}
 
 
-	public void customerArrivalEvent(String preferenceArgs){
+	public void customerArrivalEvent(final String preferenceArgs){
 		while(hasCustomer.get()){}//So that if a customer is present, other doesn't enter
 		customerArrivalHandleEvent(preferenceArgs);	
 	}

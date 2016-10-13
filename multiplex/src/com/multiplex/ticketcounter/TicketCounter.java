@@ -11,7 +11,7 @@ import com.multiplex.ticketcounter.ticket.Ticket;
 public class TicketCounter extends TicketCounterBase{
 
 	@Override
-	public synchronized void book(String preferenceArgs) {
+	public synchronized void book(final String preferenceArgs) {
 		Ticket ticket=null;
 		Seat[][] seatstatus=AuditoriumHelper.getAuditorium("Audi1").getSeatStatus();
 		String[]preferenceParameters=preferenceArgs.split("-");
@@ -35,39 +35,35 @@ public class TicketCounter extends TicketCounterBase{
 				if(!preferenceParameters[1].equals("")){
 					ticket=bookAnyNSeatsInRowTogether(noOfSeats,row,seatstatus);
 				}
-
+				else{
+					ticket=bookAnyNSeatsTogether(noOfSeats,seatstatus);
+				}
 			}
 			td(ticket);
 			System.out.println();
-			//ss(seatstatus);
 		}
 		catch(Exception e){
-			e.printStackTrace();//System.out.println(e);
+			e.printStackTrace();
 		}
-ss(seatstatus);
+		ss(seatstatus);
 	}
-
-	private Ticket bookAnyNSeatsFromBack(int noOfSeats,Seat[][] seatstatus) throws NotEnoughSeatsException{
+	private Ticket bookAnyNSeatsFromBack(final int noOfSeats,final Seat[][] seatstatus) throws NotEnoughSeatsException{
+		int nos=noOfSeats;
 		Random r=new Random();
 		Ticket ticket=new Ticket();
 		int counterId=r.nextInt();
-		for(int row=seatstatus.length-1;row>=0&&noOfSeats>0;row--){
-			for(int seat=seatstatus[row].length-1;seat>=0&&noOfSeats>0;seat--){
+		for(int row=seatstatus.length-1;row>=0&&nos>0;row--){
+			for(int seat=seatstatus[row].length-1;seat>=0&&nos>0;seat--){
 				synchronized(seatstatus[row][seat]){
 					if(seatstatus[row][seat].getSetstatus()==0){
 						seatstatus[row][seat].setSetstatus(counterId);
-
-						//	if(seatstatus[row][seat].get()==counterId){
-						//seatstatus[row][seat].set(-1);
 						ticket.add(new SeatDetail(row, seat));
-						noOfSeats--;
-						//}
+						nos--;
 					}
-
 				}
 			}
 		}
-		if(noOfSeats==0){
+		if(nos==0){
 			for(int row=seatstatus.length-1;row>=0;row--){
 				for(int seat=seatstatus[row].length-1;seat>=0;seat--){
 					if(seatstatus[row][seat].getSetstatus()==counterId){
@@ -77,24 +73,20 @@ ss(seatstatus);
 			}
 		}
 
-		if(noOfSeats>0){
+		if(nos>0){
 			for(int row=seatstatus.length-1;row>=0;row--){
 				for(int seat=seatstatus[row].length-1;seat>=0;seat--){
 					if(seatstatus[row][seat].getSetstatus()==counterId){
 						seatstatus[row][seat].setSetstatus(0);
 					}
-
-
 				}
 			}
-			throw new NotEnoughSeatsException(); 
+			throw new NotEnoughSeatsException("We cant book "+noOfSeats+" seats in this auditorium as these many seats are not available."); 
 		}
-
-
 		return ticket;
 	}
 
-	Ticket bookNSeatsInRow(int noOfSeats,int row,Seat[][] seatstatus) throws NotEnoughSeatsException{
+	Ticket bookNSeatsInRow(int noOfSeats,final int row,final Seat[][] seatstatus) throws NotEnoughSeatsException{
 		Random r=new Random();
 		Ticket ticket=new Ticket();
 		int counterId=r.nextInt();
@@ -109,6 +101,7 @@ ss(seatstatus);
 				}
 			}
 		}		
+
 		if(noOfSeats==0){
 			for(int seat=seatstatus[row].length-1;seat>=0;seat--){
 				if(seatstatus[row][seat].getSetstatus()==counterId){
@@ -117,20 +110,18 @@ ss(seatstatus);
 			}
 		}
 
-
 		if(noOfSeats>0){
 			for(int seat=seatstatus[row].length-1;seat>=0;seat--){
 				if(seatstatus[row][seat].getSetstatus()==counterId){
 					seatstatus[row][seat].setSetstatus(0);
 				}
 			}
-
-			throw new NotEnoughSeatsException();
+			throw new NotEnoughSeatsException("We cant book "+noOfSeats+" seats in row "+row+" of this auditorium as these many seats are not available."); 	
 		} 
 		return ticket;
 	}
 
-	private Ticket bookAnyNSeatsInRowTogether(int noOfSeats,int row,Seat[][] seatstatus) throws NotEnoughSeatsException{
+	private Ticket bookAnyNSeatsInRowTogether(final int noOfSeats,final int row,final Seat[][] seatstatus) throws NotEnoughSeatsException{
 		Random r=new Random();
 		Ticket ticket=new Ticket();
 		int tnos=noOfSeats;
@@ -142,21 +133,17 @@ ss(seatstatus);
 				synchronized(seatstatus[row][seat+i]){
 					if(seatstatus[row][seat+i].getSetstatus()==0){
 						seatstatus[row][seat+i].setSetstatus(counterId);
-System.out.println(seat+i+"--");
+						System.out.println(seat+i+"--");
 						tnos--;
 					}
 					else{
 						tnos=noOfSeats;
 						i=noOfSeats+1;
-						//seat+=i;
-								
 					}
 				}
-
 			}
 		}
 		if(tnos==0){
-
 			for(int seat=seatstatus[row].length-1;seat>=0;seat--){
 				if(seatstatus[row][seat].getSetstatus()==counterId){
 					seatstatus[row][seat].setSetstatus(-1);
@@ -164,19 +151,27 @@ System.out.println(seat+i+"--");
 				}
 			}
 		}
-
 		else if(tnos>0){
 			for(int seat=seatstatus[row].length-1;seat>=0;seat--){
 				if(seatstatus[row][seat].getSetstatus()==counterId){
 					seatstatus[row][seat].setSetstatus(0);
-
 				}
-
 			}
-			throw new NotEnoughSeatsException(); 
-			}
-
+			throw new NotEnoughSeatsException("We cant book "+noOfSeats+" seats together in row "+row+" of this auditorium as these many seats are not available."); 
+		}
 		return ticket;
+	}
+
+	private Ticket bookAnyNSeatsTogether(final int noOfSeats,final Seat[][] seatstatus) throws NotEnoughSeatsException{
+		for(int i=0;i<seatstatus.length;i++){
+			try{
+				return bookAnyNSeatsInRowTogether(noOfSeats, i, seatstatus);
+			}
+			catch(Exception e){
+				continue;
+			}
+		}
+		throw new NotEnoughSeatsException("We cant book "+noOfSeats+" seats together in this auditorium as these many seats are not available."); 
 	}
 
 	void td(Ticket t){
@@ -191,9 +186,6 @@ System.out.println(seat+i+"--");
 				System.out.print(s[i][j].getSetstatus()+" ");
 			}
 			System.out.println();
-
 		}
 	}
-
-
 }
