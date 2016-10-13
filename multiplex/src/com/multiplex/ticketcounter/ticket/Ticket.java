@@ -5,9 +5,9 @@ import java.util.List;
 
 public class Ticket implements ITicket {
 	private String counterName;
-	public String movieName;
-	public String movieTime;
-	public List<ITicketDetail> seats=new ArrayList<ITicketDetail>();
+	private String movieName;
+	private String movieTime;
+	private List<ITicketDetail> seats=new ArrayList<ITicketDetail>();
 
 	public String getcounterName() {
 		return counterName;

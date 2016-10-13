@@ -5,13 +5,11 @@ public class MultiplexMain {
 	public static void main(String[] args) {
 	MultiplexApplication m=MultiplexApplication.Builder.build("config.properties");
 	
-	m.counters.get("MX0001").customerArrivalEvent("MVH0001:SHSL003:14-1-1");
-	m.counters.get("MX0001").customerArrivalEvent("MVH0001:SHSL003:2-1-1");
+	m.counters.get("MX0001").customerArrivalEvent("MVH0001:SHSL003:30-1-1");
+	m.counters.get("MX0001").customerArrivalEvent("MVH0001:SHSL003:1-1-1");
 	m.counters.get("MX0001").customerArrivalEvent("MVH0001:SHSL003:4-1-1");
-
 	m.counters.get("MX0001").customerArrivalEvent("MVH0001:SHSL003:3--0");
 	m.counters.get("MX0001").customerArrivalEvent("MVH0001:SHSL003:3--0");
-
 	m.counters.get("MX0001").customerArrivalEvent("MVH0001:SHSL003:3--0");
 try {
 	Thread.sleep(2000);

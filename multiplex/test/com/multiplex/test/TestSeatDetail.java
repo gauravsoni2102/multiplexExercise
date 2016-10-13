@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.multiplex.auditorium.Seat;
 import com.multiplex.ticketcounter.ticket.SeatDetail;
 
 public class TestSeatDetail {
@@ -27,6 +26,7 @@ public class TestSeatDetail {
 		SeatDetail seatDetail=new SeatDetail(29, 9);
 		assertTrue("Seat number incorrect", seatDetail.getSeatNumber().equals("AD10"));
 	}
+
 	
 	
 }

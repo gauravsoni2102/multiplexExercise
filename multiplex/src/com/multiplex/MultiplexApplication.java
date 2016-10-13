@@ -26,6 +26,7 @@ public class MultiplexApplication {
 				System.out.println("couldnt find/read "+configFile);
 				return null;
 			}
+			
 			MultiplexApplication multiplexApplication=new MultiplexApplication();
 			multiplexApplication.counters=new HashMap<String,MultiplexTicketCounter>();
 			int counternumber=1;

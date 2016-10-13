@@ -2,9 +2,9 @@ package com.multiplex.ticketcounter;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.multiplex.ticketcounter.ticket.IPrinter;
 import com.multiplex.ticketcounter.ticket.ITicket;
+
 /**
  * @author gaurav.soni
  *The TicketCounterBase is a general base class for a ticket counter.
@@ -42,11 +42,11 @@ public abstract class TicketCounterBase implements Runnable{
 			while(!movieDetails.isEmpty()){
 				String movieDetail=movieDetails.poll();
 				ITicket ticket=book(movieDetail);
+				if(ticket!=null)
 				printer.print(ticket);
 			}
 			hasCustomer.set(false);
 		}
-
 	}
 	abstract public ITicket book(final String movieArgs);
 
@@ -55,12 +55,8 @@ public abstract class TicketCounterBase implements Runnable{
 		notify();
 	}
 
-
 	public void customerArrivalEvent(final String movieArgs){
 		movieDetails.add(movieArgs);
 		customerArrivalHandleEvent(movieArgs);	
-
 	}
-
-
 }
