@@ -7,14 +7,25 @@ import com.multiplex.auditorium.Seat;
 import com.multiplex.ticketcounter.ticket.ITicketDetail;
 import com.multiplex.ticketcounter.ticket.SeatDetail;
 import com.multiplex.ticketcounter.ticket.Ticket;
+/**
+ * @author gaurav.soni
+ *MultiplexTicketCounter consists of the logic that is used by a booking counter in the book method.
+ *Whenever a user notifies the counter, the counter thread's book method is invoked.
+ */
+public class MultiplexTicketCounter extends TicketCounterBase{
 
-public class TicketCounter extends TicketCounterBase{
-
+	public MultiplexTicketCounter(String counterId,String counterName) {
+		super(counterId,counterName);
+	}
 	@Override
-	public synchronized void book(final String preferenceArgs) {
+	public synchronized void book(final String movieArgs) {
 		Ticket ticket=null;
-		Seat[][] seatstatus=AuditoriumHelper.getAuditorium("Audi1").getSeatStatus();
-		String[]preferenceParameters=preferenceArgs.split("-");
+
+		String[] movieDetails=movieArgs.split(":");
+		String movieCode=movieDetails[0];
+		String movieTime=movieDetails[1];
+		Seat[][] seatstatus=AuditoriumHelper.getAuditorium(movieDetails[0],movieDetails[1]).getSeatStatus();
+		String[]preferenceParameters=movieDetails[2].split("-");
 		int noOfSeats=Integer.parseInt(preferenceParameters[0]);
 		int row=seatstatus.length-1;
 		if(!preferenceParameters[1].equals(""))
@@ -24,7 +35,7 @@ public class TicketCounter extends TicketCounterBase{
 		try{	
 			if(!together){
 				if(preferenceParameters[1].equals("")){
-					ticket=bookAnyNSeatsFromBack(noOfSeats,seatstatus);
+					ticket=bookAnyNSeatsFromFront(noOfSeats,seatstatus);
 				}
 				else{
 					ticket=bookNSeatsInRow(noOfSeats,row,seatstatus);
@@ -39,6 +50,8 @@ public class TicketCounter extends TicketCounterBase{
 					ticket=bookAnyNSeatsTogether(noOfSeats,seatstatus);
 				}
 			}
+			ticket.setMovieName(movieCode);
+			ticket.setMovieTime(movieTime);
 			td(ticket);
 			System.out.println();
 		}
@@ -47,7 +60,7 @@ public class TicketCounter extends TicketCounterBase{
 		}
 		ss(seatstatus);
 	}
-	private Ticket bookAnyNSeatsFromBack(final int noOfSeats,final Seat[][] seatstatus) throws NotEnoughSeatsException{
+	private Ticket bookAnyNSeatsFromFront(final int noOfSeats,final Seat[][] seatstatus) throws NotEnoughSeatsException{
 		int nos=noOfSeats;
 		Random r=new Random();
 		Ticket ticket=new Ticket();
@@ -163,9 +176,9 @@ public class TicketCounter extends TicketCounterBase{
 	}
 
 	private Ticket bookAnyNSeatsTogether(final int noOfSeats,final Seat[][] seatstatus) throws NotEnoughSeatsException{
-		for(int i=0;i<seatstatus.length;i++){
+		for(int row=seatstatus.length-1;row>=0;row--){
 			try{
-				return bookAnyNSeatsInRowTogether(noOfSeats, i, seatstatus);
+				return bookAnyNSeatsInRowTogether(noOfSeats, row, seatstatus);
 			}
 			catch(Exception e){
 				continue;

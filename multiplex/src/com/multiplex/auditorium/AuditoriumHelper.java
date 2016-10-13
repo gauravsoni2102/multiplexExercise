@@ -9,7 +9,7 @@ public class AuditoriumHelper {
 		auditoriams.put("Audi1",new Auditorium(10, 20));
 	}
 
-	static public Auditorium getAuditorium(String auditoriumName){
-		return auditoriams.get(auditoriumName);
+	static public Auditorium getAuditorium(String movieCode,String showCode){
+		return auditoriams.get("Audi1");
 	}
 }
